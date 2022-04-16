@@ -11,7 +11,7 @@ function toShow(x){
                             <p class="para">${toCut(product.description)}</p>
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center">
-                            <div class="text-primary">${product.price}$</div>
+                            <div class="text-primary">${Number(product.price).toFixed(2)}$</div>
                             <button class="btn btn-outline-primary cart-show-btn" data-id="${product.id}">
                                 <i class="fa-solid fa-cart-arrow-down"></i>
                             </button>
@@ -90,9 +90,9 @@ function cartTotal(){
     if(cartTotal.length>0){
         let total = cartTotal.reduce((x,y)=>Number(x)+Number(y));
         $('.total-box').html(
-            `<div class="d-flex justify-content-between align-items-center">
+            `<div class="d-flex justify-content-between align-items-center px-2">
                 <h4>Total</h4>
-                <h4 class="total-cost">${total}</h4>
+                <h4 class="total-cost">${Number(total).toFixed(2)}</h4>
             </div>`
             );
     }else{
@@ -105,6 +105,7 @@ $('#card-box').delegate(
     $('.cart-show-btn').on('click',function(){
     let btnId = $(this).attr('data-id');
     let productId = productArr.filter(el=>el.id==btnId)[0];
+    let productPrice = productId.price;
     showCart(btnId);
 
     $('.cart').append(`
@@ -116,7 +117,7 @@ $('#card-box').delegate(
                         <p>${productId.title}</p>
                     </div>
                     <div>
-                        <button class="btn btn-outline-danger del-btn">
+                        <button class="btn btn-outline-danger btn-sm del-btn">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -128,19 +129,20 @@ $('#card-box').delegate(
                         <button class="btn btn-outline-primary quantity-minus">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <input type="number" class="form-control w-25 mx-1 quantity p-1" value="1" min="1" unitPrice="${productId.price}">
-                        <button class="btn btn-outline-primary quantity-plus">
+                        <input type="number" class="form-control w-25 mx-1 quantity p-1" value="1" min="1" unitPrice="${productPrice}">
+                        <button class="btn btn-outline-primary quantity-plus">  
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>
                 <div>
                     <p class="mb-0">
-                        $ <span class="cart-price">${productId.price}</span>
+                        $ <span class="cart-price">${productPrice}</span>
                     </p>
                 </div>
             </div>
     </div>`);
+
 
     cartTotal();
      //Delete cart Item
