@@ -1,223 +1,194 @@
-//Main UI Products Show
-function toShow(x){
-    $('#card-box').empty();
-    x.map(function(product){
-        $('#card-box').append(            
-            `<div class="d-inline-block">
-            <div class="card border-0 me-1 mt-2 product-show-card" style="border:'none'" data-id='${product.id}'>
-                        <img src="${product.image}" alt="" style="height: 200px;width: 200px;margin-bottom:-40px;margin-left:10px;z-index:1">
-                        <div class="card-body border pt-5 pb-0">
-                            <h4 class="header text-primary text-nowrap overflow-hidden">${product.title}</h4>
-                            <p class="para">${toCut(product.description)}</p>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between align-items-center">
-                            <div class="text-primary">${Number(product.price).toFixed(2)}$</div>
-                            <button class="btn btn-outline-primary cart-show-btn" data-id="${product.id}">
-                                <i class="fa-solid fa-cart-arrow-down"></i>
-                            </button>
-                        </div>
-            </div>
-            </div>`
-        )
-    })
-};
 
-//to store products
+//product Array
 let productArr = [];
 
-let productInfo = productData;
-
-//show Products 
-productArr=productInfo;
-toShow(productArr);
-
-
-//cutting text from description
-function toCut(x,y=150){
-    if(x.length<=y){
-        return x;
-    }else{
-       return x.substring(1,y);
-    }
-};
-
-$('input').on('keyup',function(){
-    let inputVal = $(this).val();
-    if(inputVal.trim().length){
-        let filterProduct = productArr.filter((element)=>{
-            if(element.title.toLowerCase().indexOf(inputVal)>-1 || element.description.toLowerCase().indexOf(inputVal)>-1 || element.price == inputVal){
-                return element;
-            }
-        });
-        toShow(filterProduct);
-    };
-});
-
-//add category data
-let categoryInfo = categoryData;
-    categoryInfo.map((cat)=>{
-        $('#select').append(`<option value="${cat}">${cat}</option>`)
+//Show products
+function toShow(x){
+    $('.product-box').empty();
+    x.map(function(el){
+        $('.product-box').append(`
+            <div class="d-inline-block">
+                <div class="card">
+                    <img src="${el.image}" alt="">
+                    <div class="card-body border border-1 pt-5" id="product-cb">
+                        <h4 class="product-title text-nowrap overflow-hidden text-primary">${el.title}</h4>
+                        <p class="product-para">${cutWords(el.description)}</p>
+                        <div class="border border-1 mb-2"></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="product-price">${el.price} $</div>
+                            <div class="btn btn-outline-primary btn-sm cart-show-btn" custom-id="${el.id}">
+                                <i class="fa-solid fa-cart-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`);
     })
 
-
-
-//show products by <select option>
-$('#select').change(function(){
-    let optionVal = $(this).val();
-   
-    let productCategory = productArr.filter(function(element){
-        if(element.category == optionVal){
-            return element;
-        };
-    });
-    toShow(productCategory);
-
-    if(optionVal==0){
-        toShow(productArr);
-    };
-    
-});
-
-//Total Cart Show
-function cartTotal(){
-
-    let priceLength = $('.cart-price').length;
-     $('.shopping-cart-count').html(priceLength);
-
-    let cartTotal = $('.cart-price').toArray().map(el=>el.innerHTML);
-
-    //After delete every cart, show this
-    if(cartTotal.length>0){
-        let total = cartTotal.reduce((x,y)=>Number(x)+Number(y));
-        $('.total-box').html(
-            `<div class="d-flex justify-content-between align-items-center px-2">
-                <h4>Total</h4>
-                <h4 class="total-cost">${Number(total).toFixed(2)}</h4>
-            </div>`
-            );
-    }else{
-        $('.total-box').html("Choose something!")
-    }
-            
 };
 
-$('#card-box').delegate(
-    $('.cart-show-btn').on('click',function(){
-    let btnId = $(this).attr('data-id');
-    let productId = productArr.filter(el=>el.id==btnId)[0];
-    let productPrice = productId.price;
-    showCart(btnId);
-
-    $('.cart').append(`
-        <div class="cart-child card p-1 border border-0 border-bottom mb-1" custom-id="${productId.id}">
-            <div>
-                <div class="d-flex justify-content-between align-items-baseline">
-                    <div>
-                        <img src="${productId.image}" alt="" style="height:50px">
-                        <p>${productId.title}</p>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-danger btn-sm del-btn">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="form-row d-flex">
-                        <button class="btn btn-outline-primary quantity-minus">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" class="form-control w-25 mx-1 quantity p-1" value="1" min="1" unitPrice="${productPrice}">
-                        <button class="btn btn-outline-primary quantity-plus">  
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <p class="mb-0">
-                        $ <span class="cart-price">${productPrice}</span>
-                    </p>
-                </div>
-            </div>
-    </div>`);
-
-
-    cartTotal();
-     //Delete cart Item
-    $('.cart').delegate( $('.del-btn').on('click',function(){
-        $(this).parentsUntil('.cart').remove();
-        cartTotal();
-   
-    })   
-    );
-    
-    $('.cart').delegate($('.quantity-plus').on('click',function(){
-        let quantityVal = $(this).siblings('.quantity').val();
-        let p = Number(quantityVal)+1;
+ //Cart Show
+ $('.product-box').delegate('.cart-show-btn','click',function(){
+        let showBtnId = $(this).attr('custom-id');
+        let catchProduct = productArr.filter(el=>el.id==showBtnId)[0];
+        let cartId = $('.cart-leader').toArray().map(el=>el.getAttribute('cart-id'));
         
-        let unitPrice = $(this).siblings('.quantity').attr('unitPrice');
-        let cartPrice = $(this).parent().parent().siblings('div').find('.cart-price');
-    
-        let qPlusVal = $(this).siblings('.quantity').val(p).val();
-        cartPrice.html(qPlusVal*unitPrice);
-
-        cartTotal();
-    }));
-
-    $('.cart').delegate($('.quantity-minus').on('click',function(){
-        let quantityVal = $(this).siblings('.quantity').val();
-
-        if(quantityVal>1){
-            let p = Number(quantityVal)-1;
-        
-            let unitPrice = $(this).siblings('.quantity').attr('unitPrice');
-            let cartPrice = $(this).parent().parent().siblings('div').find('.cart-price');
-        
-            let qMinusVal = $(this).siblings('.quantity').val(p).val();
-            cartPrice.html(qMinusVal*unitPrice);
+        //no to repeat Cart
+        if(cartId.includes(showBtnId)){
+            alert("Already Added!");
         }else{
-            alert("At least, must be One")
+            $('.cart-box').append(`
+            <div class="cart-leader mb-3" cart-id="${showBtnId}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <img src="${catchProduct.image}" alt="">
+                <button class="btn btn-outline-danger btn-sm del-btn">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div class="mb-2">
+                <p class="mb-0">${catchProduct.title}</p>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2 cart-btns-box">
+                <div class="d-flex">
+                    <button class="btn btn-outline-primary cart-minus-btn">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" class="form-control w-25 mx-1 input-value" value="1" min="1" input-value="${catchProduct.price}">
+                    <button class="btn btn-outline-primary cart-plus-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div>$ <span class="cart-product-price">${Number(catchProduct.price).toFixed(2)}</span> </div>
+            </div>
+            <div class="divider"></div>
+        </div>`)
         }
        
-        cartTotal();
-    }));
+        totalPrice();
 
-    $('.cart').delegate($('.quantity').on('keyup change',function(){
-       if($(this).val()>1){
-        let unitPrice = $(this).attr('unitPrice');
-        let inputVal = $(this).val();
-        let cartPrice = $(this).parent().parent().siblings('div').find('.cart-price');
-        cartPrice.html(inputVal*unitPrice);
-       }else{
-           alert("At least, must be One!")
-       }
-       cartTotal();
-    }))
-})
-);
+ });
 
+//show Total Price of Chosen Total order products
+function totalPrice(){
+    let cartProductPriceLength = $('.cart-product-price').length;
+    $('.total-order').html(cartProductPriceLength);
 
-
-//show carts without repeat
-function showCart(x){
-    let cartChildArr = $('.cart-child').toArray();
+    if(cartProductPriceLength>0){
+        let cartPrice = $('.cart-product-price').toArray().map(function(el){return el.innerHTML});
+        let cartPriceTotal = cartPrice.reduce(function(x,y){
+            return Number(x)+Number(y);
+        });
     
-    cartChildArr.filter(el=>{
-        let customId = el.getAttribute('custom-id');
-        if(customId.includes(x)){
-            alert("Added already and remove old one!");
-            //  console.log($( `.cart-child[custom-id='${x}']` ));
-            $( `.cart-child[custom-id='${x}']` ).remove();
-        }
-    });  
+        $('.total-box').html(`<div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h4>Total</h4>
+            </div>
+            <h4>$ <span id="total-price">${Number(cartPriceTotal).toFixed(2)}</span></h4>
+        </div>`)
+    }else{
+        $('.total-box').html("Choose Something!")
+    };
+   
 };
 
+//cart-plus-btn
+$('.cart-box').delegate('.cart-plus-btn','click',function(){
+    let inputVal = $(this).siblings('.input-value').val();
+    let plusOne = Number(inputVal)+1;
+
+    let plusInputVal = $(this).siblings('.input-value').val(plusOne).val();
+    let inputPrice = $(this).siblings('.input-value').attr('input-value');
+
+    let cartProductPrice = $(this).parent().siblings().find('.cart-product-price');
+    let result = plusInputVal*inputPrice;
+    cartProductPrice.html(result.toFixed(2));
+    totalPrice();
+});
+
+//cart-minus-btn
+$('.cart-box').delegate('.cart-minus-btn','click',function(){
+  
+        if($(this).siblings('.input-value').val()>1){
+            let inputVal = $(this).siblings('.input-value').val();
+            let plusOne = Number(inputVal)-1;
+        
+            let plusInputVal = $(this).siblings('.input-value').val(plusOne).val();
+            let inputPrice = $(this).siblings('.input-value').attr('input-value');
+        
+            let cartProductPrice = $(this).parent().siblings().find('.cart-product-price');
+            let result = plusInputVal*inputPrice;
+            cartProductPrice.html(result.toFixed(2));
+        }else{
+            alert("At least must be one!")
+        }
+    
+    totalPrice();
+})
 
 
+//cart delete btn working
+$('.cart-box').delegate('.del-btn','click',function(){
+    let want = $(this).parentsUntil('.cart-box').remove();
+    totalPrice();
+});
+
+//Add Products
+$.get('https://fakestoreapi.com/products',product=>{
+    productArr = product;
+    toShow(productArr);
+});
+
+//input with filter to show
+$('#product-input').on('keyup',function(){
+    let inputVal = $(this).val().toLowerCase().trim();
+    let filterProduct = productArr.filter(function(el){
+        let filterTitle = el.title.toLowerCase().indexOf(inputVal);
+        let filterDescription = el.description.toLowerCase().indexOf(inputVal);
+        let filterPrice = el.price;
+
+        if(filterTitle>-1 || filterDescription>-1 || filterPrice == inputVal){
+            return el;
+        }
+    });
+    toShow(filterProduct);
+});
+
+//category with filter to show
+$('#category-select').on('change',function(){
+    let categorySelect = $(this).val();
+    let filterCategory = productArr.filter(function(el){
+        let elCat = el.category;
+        if(categorySelect == elCat){
+            return el;
+        }
+    });
+    toShow(filterCategory);
+
+    if(categorySelect == 0){
+        toShow(productArr);
+    }
+});
+
+//Add Categories
+$.get('https://fakestoreapi.com/products/categories',(category)=>{
+    category.map(function(el){
+        $('#category-select').append(`
+            <option value="${el}">${el}</option>
+        `);
+    }); 
+});
 
 
+//words cut to beautify
+function cutWords(x,y=150){
+    let xLength = x.length;
+    if(xLength<y){
+        return x;
+    }else{
+        let cutWords = x.substring(0,y);
+        return cutWords;
+    }
+}
 
 
 

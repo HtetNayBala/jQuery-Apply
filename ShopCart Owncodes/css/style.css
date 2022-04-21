@@ -1,0 +1,23 @@
+@font-face {
+    font-family: mm;
+    src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
+}
+
+*{
+    box-sizing: border-box;
+}
+body{
+    font-family: mm;
+}
+
+@media screen and (max-width:480px) {
+    #intro{
+        display:  flex !important;
+        flex-direction: column !important;
+        padding-bottom: 5px !important;
+    }
+    #intro>:first-child{
+        margin-bottom: 10px !important;
+        width: 100%;
+    }
+}
